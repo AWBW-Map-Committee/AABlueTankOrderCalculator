@@ -1,0 +1,120 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+    	    function tankOrder(w1, w2, w3, s1, s2, s3, nb, lab) {
+            var ply = 0;
+            var tanks = 0;
+			var extraIncome = [1, 1];
+			if (lab) {
+				if (w1 < 1 && w2 < 1 && w3 < 1 && s1 < 1 && s2 < 1 && s3 < 1){ //failsafe
+					var answerBox = document.getElementById("Answer");
+					answerBox.innerHTML = "No Tank Income :(";
+					return;
+				}
+				var extraIncome = [0, 0];
+			}
+            const banked = [0, 0];
+
+            const p1cities = [w1, w2, w3, s1, s2, s3];
+            const p2cities = [w1, w2, w3, s1, s2, s3];
+            const cities = [p1cities, p2cities];
+            if (nb) {
+              for (let i = 0; i < 2; i++) {
+                cities[i][5] = cities[i][4];
+                cities[i][4] = cities[i][3];
+                cities[i][3] = 0;
+              }
+            }
+
+            const p1future = [0,0,0,0];
+            const p2future = [0,0,0,0];
+            for (let i = 3; i < 6; i++) {
+                if (p2cities[i] > 0) {
+                    p2cities[i]--;
+                    p2future[i - 2]++;
+                    break;
+                }
+            }
+            const futureIncome = [p1future, p2future];
+
+            var answerBox = document.getElementById("Answer");
+            answerBox.innerHTML = "";
+            while (tanks < 4) {
+                var player = ply%2;
+                banked[player] += extraIncome[player];
+                extraIncome[player] += futureIncome[player][0];
+                for (let i = 1; i < 4; i++) {
+                    futureIncome[player][i - 1] = futureIncome[player][i]; 
+                }
+
+                for (let i = 0; i < 3; i++) {
+                    if (cities[player][i] > 0) {
+                        cities[player][i]--;
+                        futureIncome[player][i + 1]++;
+                        break;
+                    }
+                }
+                for (let i = 3; i < 6; i++) {
+                    if (cities[player][i] > 0) {
+                        cities[player][i]--;
+                        futureIncome[player][i - 2]++;
+                        break;
+                    }
+                }
+
+                if (banked[player] >= 6) {
+                    banked[player] -= 6;
+                    answerBox.innerHTML += "Player " + (player + 1) + " tank, day " + (ply / 2 + 1) + `<br>`;
+                    tanks++;
+                }
+                ply += 1;
+            }
+        }
+
+        function handleButtonClick() {
+            // Get values from text boxes
+            var param1 = document.getElementById('w1').value;
+            var param2 = document.getElementById('w2').value;
+            var param3 = document.getElementById('w3').value;
+            var param4 = document.getElementById('s1').value;
+            var param5 = document.getElementById('s2').value;
+            var param6 = document.getElementById('s3').value;
+            var param7 = false;
+			var param8 = false;
+            if (document.getElementById('nb').value == "y") param7 = true;
+            if (document.getElementById('lab').value == "y") param8 = true;
+
+
+            // Call tankorder function with the input values
+            tankOrder(param1, param2, param3, param4, param5, param6, param7, param8);
+        }
+    </script>
+    <p>The strong side refers to whichever side has the FTA counter infantry</p>
+    <form action="/action_page.php">
+        <label for="s1">How many cities 1 move from the strong side </label>
+        <input type="text" id="s1" name="s1"><br>
+        <label for="s2">How many cities 2 moves from the strong side </label>
+        <input type="text" id="s2" name="s2"><br>
+        <label for="s3">How many cities 3 moves from the strong side </label>
+        <input type="text" id="s3" name="s3"><br>
+        <label for="w1">How many cities 1 move from the weak side </label>
+        <input type="text" id="w1" name="w1"><br>
+        <label for="w2">How many cities 2 moves from the weak side </label>
+        <input type="text" id="w2" name="w2"><br>
+        <label for="w3">How many cities 3 moves from the weak side </label>
+        <input type="text" id="w3" name="w3"><br>
+        <label for="w3">Neutral base? ("y" for yes)</label>
+        <input type="text" id="nb" name="nb">
+		<label for="w3">Labs? ("y" for yes)</label>
+		<input type="text" id="lab" name="lab">
+      </form>
+      <button type="button" onclick="handleButtonClick()">Check tank order</button>
+      <br>
+      <div id="Answer"></div>
+</body>
+</html>
